@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card locked-box">
+  <div class="icon">🔒</div>
+  <h1>CHALLENGE LOCKED</h1>
+  <p class="muted">Complete the payment to start your {{ challenge_type }} challenge.</p>
+  <a class="btn" href="{{ url_for('public.landing') }}">Back to challenges</a>
+</div>
+{% endblock %}

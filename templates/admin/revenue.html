@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Revenue</h1>
+{% include "admin/_nav.html" %}
+<div class="summary-cards">
+  <div class="card"><div class="num">₹{{ data.total }}</div><div class="label">Total Revenue</div></div>
+  <div class="card"><div class="num">₹{{ data.today }}</div><div class="label">Today</div></div>
+  <div class="card"><div class="num">₹{{ data.week }}</div><div class="label">Last 7 Days</div></div>
+  <div class="card"><div class="num">₹{{ data.month }}</div><div class="label">Last 30 Days</div></div>
+  <div class="card"><div class="num">₹{{ data.intermediate }}</div><div class="label">Intermediate Revenue</div></div>
+  <div class="card"><div class="num">₹{{ data.advanced }}</div><div class="label">Advanced Revenue</div></div>
+  <div class="card"><div class="num">{{ data.successful }}</div><div class="label">Successful</div></div>
+  <div class="card"><div class="num">{{ data.failed }}</div><div class="label">Failed</div></div>
+  <div class="card"><div class="num">{{ data.pending }}</div><div class="label">Pending</div></div>
+</div>
+{% endblock %}

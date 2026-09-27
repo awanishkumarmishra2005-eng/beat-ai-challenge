@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Certificate Verification</h1>
+<div class="card">
+  {% if found %}
+    <p><strong>{{ cert.participant_name }}</strong> completed the <strong>{{ cert.challenge_type.upper() }}</strong> challenge on {{ cert.issued_at.strftime('%d %B %Y') }}.</p>
+    {% if cert.result_category == 'champion' %}<div class="badge champion">🏆 BEAT AI CHAMPION</div>
+    {% elif cert.result_category == 'survivor' %}<div class="badge survivor">🤖 BEAT AI SURVIVOR</div>
+    {% else %}<div class="badge draw">⚡ BEAT AI DRAW</div>{% endif %}
+    <p class="muted">Certificate ID: {{ cert.certificate_code }}</p>
+  {% else %}
+    <p>❌ No certificate found for this code.</p>
+  {% endif %}
+</div>
+{% endblock %}

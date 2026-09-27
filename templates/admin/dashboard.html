@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Admin Dashboard</h1>
+{% include "admin/_nav.html" %}
+
+<div class="summary-cards">
+  <div class="card"><div class="num">₹{{ total_revenue }}</div><div class="label">Total Revenue</div></div>
+  <div class="card"><div class="num">₹{{ today_revenue }}</div><div class="label">Today's Revenue</div></div>
+  <div class="card"><div class="num">{{ successful }}</div><div class="label">Successful Payments</div></div>
+  <div class="card"><div class="num">{{ intermediate_paid }}</div><div class="label">Intermediate Payments</div></div>
+  <div class="card"><div class="num">{{ advanced_paid }}</div><div class="label">Advanced Payments</div></div>
+  <div class="card"><div class="num">{{ pending }}</div><div class="label">Pending Payments</div></div>
+  <div class="card"><div class="num">{{ failed }}</div><div class="label">Failed Payments</div></div>
+</div>
+
+<div class="card">
+  <h3>Recent Payments</h3>
+  <div class="table-scroll">
+  <table>
+    <tr><th>Order ID</th><th>Participant</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr>
+    {% for p in recent_payments %}
+    <tr>
+      <td>{{ p.order_id }}</td>
+      <td>{{ p.participant.name }}</td>
+      <td>{{ p.challenge_type }}</td>
+      <td>₹{{ '%d'|format(p.amount_rupees) }}</td>
+      <td><span class="status-pill status-{{ p.status }}">{{ p.status }}</span></td>
+      <td>{{ p.created_at.strftime('%d %b %H:%M') }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+</div>
+{% endblock %}

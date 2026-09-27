@@ -1,0 +1,9 @@
+<div class="admin-nav">
+  <a href="{{ url_for('admin.dashboard') }}" class="{{ 'active' if request.endpoint=='admin.dashboard' }}">Dashboard</a>
+  <a href="{{ url_for('admin.payments') }}" class="{{ 'active' if request.endpoint=='admin.payments' }}">Payments</a>
+  <a href="{{ url_for('admin.participants') }}" class="{{ 'active' if request.endpoint=='admin.participants' }}">Participants</a>
+  <a href="{{ url_for('admin.revenue') }}" class="{{ 'active' if request.endpoint=='admin.revenue' }}">Revenue</a>
+  <a href="{{ url_for('admin.feedback') }}" class="{{ 'active' if request.endpoint=='admin.feedback' }}">Feedback</a>
+  <a href="{{ url_for('admin.settings') }}" class="{{ 'active' if request.endpoint=='admin.settings' }}">Settings</a>
+  <a href="{{ url_for('admin.logout') }}">Logout</a>
+</div>

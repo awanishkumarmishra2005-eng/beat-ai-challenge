@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ payment.challenge_type.upper() }} CHALLENGE — ₹{{ '%d'|format(payment.amount_rupees) }}</h1>
+
+<div id="pay-panel" class="card center">
+  {% if payment.status == 'SUCCESS' %}
+    <p>✅ PAYMENT VERIFIED. Your challenge is unlocked.</p>
+    <a class="btn btn-gold" href="{{ url_for('public.challenge_gate', attempt_code=payment.attempt.attempt_code) }}">START CHALLENGE</a>
+  {% else %}
+    <p>Pay ₹{{ '%d'|format(payment.amount_rupees) }} to unlock your challenge</p>
+
+    {% if payment_mode == 'test' %}
+      <p class="muted">TEST PAYMENT MODE — this simulates a real payment through the actual backend verification logic.</p>
+      <button id="test-pay-btn">TEST PAYMENT</button>
+    {% else %}
+      <button id="rzp-btn">PAY NOW</button>
+    {% endif %}
+
+    <div id="verifying" style="display:none">
+      <div class="spinner"></div>
+      <p>Verifying payment...</p>
+    </div>
+  {% endif %}
+</div>
+
+{% if settings and settings.upi_id %}
+<div class="card center">
+  <p class="muted">Or pay via UPI: <strong>{{ settings.upi_id }}</strong></p>
+  {% if settings.qr_image_path %}<img src="{{ settings.qr_image_path }}" alt="UPI QR" style="max-width:180px">{% endif %}
+</div>
+{% endif %}
+
+{% if payment_mode == 'live' %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% endif %}
+<script>
+const orderId = {{ payment.order_id | tojson }};
+const paymentMode = {{ payment_mode | tojson }};
+
+function showVerifying() {
+  document.getElementById('verifying').style.display = 'block';
+}
+
+const testBtn = document.getElementById('test-pay-btn');
+if (testBtn) {
+  testBtn.addEventListener('click', async () => {
+    showVerifying();
+    const res = await fetch('/api/pay/test-confirm', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({order_id: orderId})
+    });
+    const data = await res.json();
+    if (data.ok) { window.location.href = data.redirect; }
+  });
+}
+
+const rzpBtn = document.getElementById('rzp-btn');
+if (rzpBtn) {
+  rzpBtn.addEventListener('click', () => {
+    const options = {
+      key: {{ razorpay_key_id | tojson }},
+      order_id: orderId,
+      name: "BEAT AI CHALLENGE",
+      description: {{ payment.challenge_type | tojson }} + " challenge",
+      handler: async function (response) {
+        showVerifying();
+        const res = await fetch('/api/pay/razorpay-verify', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+          })
+        });
+        const data = await res.json();
+        if (data.ok) { window.location.href = data.redirect; }
+        else { alert('Payment verification failed. Please try again.'); }
+      },
+      modal: {
+        ondismiss: function () {
+          fetch('/api/pay/cancel', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({order_id: orderId})
+          });
+        }
+      }
+    };
+    const rzp = new Razorpay(options);
+    rzp.open();
+  });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Leaderboard</h1>
+<div class="admin-nav">
+  <a href="{{ url_for('public.leaderboard', tier='intermediate') }}" class="{{ 'active' if tier=='intermediate' }}">Intermediate</a>
+  <a href="{{ url_for('public.leaderboard', tier='advanced') }}" class="{{ 'active' if tier=='advanced' }}">Advanced</a>
+</div>
+<div class="card">
+  <div class="table-scroll">
+  <table>
+    <tr><th>Rank</th><th>Name</th><th>Human %</th><th>AI %</th><th>Result</th><th>Date</th></tr>
+    {% for attempt, participant in rows %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ participant.name }}</td>
+      <td>{{ attempt.human_score_pct }}%</td>
+      <td>{{ attempt.ai_score_pct }}%</td>
+      <td>
+        {% if attempt.result_category == 'champion' %}🏆 Champion
+        {% elif attempt.result_category == 'survivor' %}🤖 Survivor
+        {% else %}⚡ Draw{% endif %}
+      </td>
+      <td>{{ attempt.completed_at.strftime('%d %b') if attempt.completed_at else '—' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="center muted">No opted-in results yet — be the first!</td></tr>
+    {% endfor %}
+  </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="challenge-container">
+
+  <h1>{{ attempt.challenge_type.upper() }} CHALLENGE</h1>
+
+  <div class="card">
+
+    <div id="q-progress" class="q-progress">
+      Loading...
+    </div>
+
+    <div id="q-text" class="q-text"></div>
+
+    <div id="q-options" class="q-options"></div>
+
+    <button id="next-btn" class="next-btn" disabled>
+      NEXT →
+    </button>
+
+  </div>
+
+</div>
+
+
+<style>
+
+.challenge-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.challenge-container h1 {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.card {
+  padding: 30px;
+  border-radius: 18px;
+}
+
+.q-progress {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.q-text {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin-bottom: 25px;
+}
+
+.q-options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.option-btn {
+  display: block;
+  width: 100%;
+  padding: 16px 18px;
+
+  background: white;
+  color: #111827;
+
+  border: 2px solid #d1d5db;
+  border-radius: 12px;
+
+  font-size: 17px;
+  text-align: left;
+
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.option-btn:hover {
+  border-color: #6366f1;
+  background: #f5f3ff;
+}
+
+.option-btn.selected {
+  border-color: #6366f1;
+  background: #ede9fe;
+  font-weight: bold;
+}
+
+.next-btn {
+  display: block;
+
+  margin: 25px auto 0;
+
+  padding: 14px 35px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #6366f1;
+  color: white;
+
+  font-size: 17px;
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.next-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+
+  .challenge-container {
+    margin: 20px auto;
+    padding: 12px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .q-text {
+    font-size: 20px;
+  }
+
+  .option-btn {
+    font-size: 16px;
+  }
+
+}
+
+</style>
+
+
+<script>
+
+const attemptCode = {{ attempt.attempt_code | tojson }};
+
+let selectedAnswer = null;
+let currentQuestionFinished = false;
+
+
+// ================================
+// LOAD QUESTION
+// ================================
+
+async function loadQuestion() {
+
+  selectedAnswer = null;
+  currentQuestionFinished = false;
+
+  const nextBtn =
+    document.getElementById("next-btn");
+
+  nextBtn.disabled = true;
+  nextBtn.textContent = "NEXT →";
+
+
+  const res = await fetch(
+    `/api/challenge/${attemptCode}/question`
+  );
+
+
+  if (res.status === 403) {
+    window.location.href = "/";
+    return;
+  }
+
+
+  const data = await res.json();
+
+
+  // Challenge finished
+  if (data.done) {
+
+    window.location.href =
+      `/result/${attemptCode}`;
+
+    return;
+  }
+
+
+  // Progress
+  document.getElementById("q-progress")
+    .textContent =
+    `Question ${data.index + 1} of ${data.total}`;
+
+
+  // Question
+  document.getElementById("q-text")
+    .textContent = data.text;
+
+
+  // Options
+  const optsDiv =
+    document.getElementById("q-options");
+
+  optsDiv.innerHTML = "";
+
+
+  data.options.forEach((opt, index) => {
+
+    const btn =
+      document.createElement("button");
+
+    btn.type = "button";
+
+    btn.className =
+      "option-btn";
+
+    btn.textContent =
+      `${String.fromCharCode(65 + index)}. ${opt.text}`;
+
+
+    btn.onclick = () => {
+
+      // Remove previous selection
+      document
+        .querySelectorAll(".option-btn")
+        .forEach(b =>
+          b.classList.remove("selected")
+        );
+
+
+      // Select this option
+      btn.classList.add("selected");
+
+
+      selectedAnswer = opt.key;
+
+
+      // Enable NEXT
+      nextBtn.disabled = false;
+
+    };
+
+
+    optsDiv.appendChild(btn);
+
+  });
+
+}
+
+
+// ================================
+// NEXT / SUBMIT
+// ================================
+
+document
+  .getElementById("next-btn")
+  .onclick = async function() {
+
+    if (selectedAnswer === null) {
+      return;
+    }
+
+
+    const nextBtn =
+      document.getElementById("next-btn");
+
+
+    nextBtn.disabled = true;
+    nextBtn.textContent = "SAVING...";
+
+
+    // Disable options
+    document
+      .querySelectorAll(".option-btn")
+      .forEach(b => b.disabled = true);
+
+
+    try {
+
+      const res = await fetch(
+        `/api/challenge/${attemptCode}/answer`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+            chosen_index: selectedAnswer
+          })
+        }
+      );
+
+
+      const data = await res.json();
+
+
+      // Last question
+      if (data.finished) {
+
+        nextBtn.textContent =
+          "COMPLETED ✓";
+
+
+        setTimeout(() => {
+
+          window.location.href =
+            `/result/${attemptCode}`;
+
+        }, 300);
+
+        return;
+      }
+
+
+      // Next question
+      loadQuestion();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      nextBtn.disabled = false;
+
+      nextBtn.textContent = "NEXT →";
+
+      document
+        .querySelectorAll(".option-btn")
+        .forEach(b => b.disabled = false);
+
+    }
+
+  };
+
+
+// Start
+loadQuestion();
+
+</script>
+
+{% endblock %}

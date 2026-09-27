@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Payment Settings</h1>
+{% include "admin/_nav.html" %}
+<div class="card" style="max-width:480px">
+  <form method="post">
+    <label>UPI ID</label>
+    <input type="text" name="upi_id" value="{{ settings.upi_id }}" placeholder="yourname@upi">
+    <label>Display Name</label>
+    <input type="text" name="display_name" value="{{ settings.display_name }}" placeholder="BEAT AI CHALLENGE">
+    <p class="muted">QR code upload can be added later — for now the app runs on Razorpay checkout or the guarded test-payment button.</p>
+    <div style="margin-top:16px"><button type="submit">Save Settings</button></div>
+  </form>
+</div>
+{% endblock %}

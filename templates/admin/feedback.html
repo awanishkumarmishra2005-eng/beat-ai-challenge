@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Feedback</h1>
+{% include "admin/_nav.html" %}
+
+<div class="summary-cards">
+  {% for level, count in by_level.items() %}
+  <div class="card"><div class="num">{{ count }}</div><div class="label">{{ level }} responses</div></div>
+  {% endfor %}
+  {% for reaction, count in by_reaction.items() %}
+  <div class="card"><div class="num">{{ count }}</div><div class="label">{{ reaction }}</div></div>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <div class="table-scroll">
+  <table>
+    <tr><th>Level</th><th>Result</th><th>Reaction</th><th>Comment</th><th>Date</th></tr>
+    {% for f in rows %}
+    <tr>
+      <td>{{ f.challenge_type }}</td>
+      <td>{{ f.result_category or '—' }}</td>
+      <td>{{ f.reaction }}</td>
+      <td>{{ f.comment or '—' }}</td>
+      <td>{{ f.created_at.strftime('%d %b %H:%M') }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="center muted">No feedback yet</td></tr>
+    {% endfor %}
+  </table>
+  </div>
+</div>
+{% endblock %}

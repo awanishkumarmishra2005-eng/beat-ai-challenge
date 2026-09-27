@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card result-hero">
+  <div style="font-size:2.2rem">🎉</div>
+  <h1>YOU DID IT!</h1>
+  <p class="muted">Thanks for taking the BEAT AI Challenge.</p>
+
+  <div class="stat-row">
+    <div class="stat"><div class="num">{{ attempt.human_score_pct }}%</div><div class="label">YOUR PERFORMANCE</div></div>
+    <div class="stat"><div class="num">{{ attempt.ai_score_pct }}%</div><div class="label">AI BENCHMARK</div></div>
+    <div class="stat"><div class="num">{{ '%+.1f'|format(attempt.human_score_pct - attempt.ai_score_pct) }}%</div><div class="label">DIFFERENCE</div></div>
+  </div>
+
+  {% if attempt.result_category == 'champion' %}
+    <div class="badge champion">🏆 BEAT AI CHAMPION</div>
+  {% elif attempt.result_category == 'survivor' %}
+    <div class="badge survivor">🤖 BEAT AI SURVIVOR</div>
+  {% else %}
+    <div class="badge draw">⚡ BEAT AI DRAW</div>
+  {% endif %}
+
+  {% if cert %}
+  <div style="margin-top:20px">
+    <p class="muted">Your {{ cert.certificate_type }} certificate is ready — ID: {{ cert.certificate_code }}</p>
+    <a class="btn btn-gold" href="{{ url_for('public.view_certificate', code=cert.certificate_code) }}">VIEW CERTIFICATE</a>
+    <a class="btn" href="{{ url_for('public.download_certificate', code=cert.certificate_code) }}">DOWNLOAD</a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card center" id="feedback-card">
+  <p><strong>How did you feel after challenging AI?</strong></p>
+  <div class="reaction-row">
+    <button class="reaction-btn" data-reaction="loved_it">😍<br><span>Loved it</span></button>
+    <button class="reaction-btn" data-reaction="super_fun">🔥<br><span>Super fun</span></button>
+    <button class="reaction-btn" data-reaction="challenging">😎<br><span>Challenging</span></button>
+    <button class="reaction-btn" data-reaction="surprised">🤯<br><span>AI surprised me</span></button>
+    <button class="reaction-btn" data-reaction="revenge">😂<br><span>I want revenge</span></button>
+  </div>
+</div>
+
+{% if attempt.challenge_type == 'intermediate' %}
+<div class="card center upsell-card">
+  <p class="muted">You've come this far.</p>
+  <h2>🔥 READY FOR THE ULTIMATE AI BATTLE?</h2>
+  <p class="muted">Now test yourself against the hardest challenge — and unlock the most premium certificate.</p>
+  <a class="btn btn-gold" href="{{ url_for('public.register', challenge_type='advanced') }}">UNLOCK ADVANCED — ₹30</a>
+</div>
+{% endif %}
+
+<div class="center"><a class="btn" href="{{ url_for('public.landing') }}">Back to challenges</a></div>
+
+<script>
+document.querySelectorAll('.reaction-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    document.querySelectorAll('.reaction-btn').forEach(b => b.disabled = true);
+    btn.classList.add('selected');
+    await fetch('/api/feedback', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({attempt_code: {{ attempt.attempt_code | tojson }}, reaction: btn.dataset.reaction})
+    });
+  });
+});
+</script>
+{% endblock %}

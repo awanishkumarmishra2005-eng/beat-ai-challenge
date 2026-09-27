@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>CAN YOU BEAT AI?</h1>
+<p class="muted">Your brain vs AI. Who wins?<br>You don't have to be smart. You just have to be brave enough to try.</p>
+
+<div class="challenge-choice">
+  <a class="choice-card" href="{{ url_for('public.play_beginner') }}">
+    <div class="tag">🟢 LEVEL 1 · BEGINNER</div>
+    <div class="price">FREE</div>
+    <div class="tag">5 easy questions · no signup needed</div>
+    <div class="btn" style="margin-top:10px">PLAY FREE</div>
+  </a>
+
+  <a class="choice-card" href="{{ url_for('public.register', challenge_type='intermediate') }}">
+    <div class="tag">🟡 LEVEL 2 · INTERMEDIATE 🔒</div>
+    <div class="price">₹20</div>
+    <div class="tag">10 questions · medium difficulty · premium certificate</div>
+  </a>
+
+  <a class="choice-card" href="{{ url_for('public.register', challenge_type='advanced') }}">
+    <div class="tag">🔴 LEVEL 3 · ADVANCED 🔒</div>
+    <div class="price">₹30</div>
+    <div class="tag">10 questions · the ultimate AI battle · premium certificate</div>
+  </a>
+</div>
+
+<p class="center" style="margin-top:20px"><a href="{{ url_for('public.leaderboard', tier='intermediate') }}" class="muted">View leaderboard →</a></p>
+{% endblock %}

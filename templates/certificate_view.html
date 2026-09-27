@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="cert-stage {{ 'premium' if cert.certificate_type == 'premium' else 'normal' }}">
+  <div class="cert-card reveal">
+    <div class="cert-brand">⚡ BEAT AI CHALLENGE</div>
+    {% if cert.certificate_type == 'premium' %}<div class="cert-premium-badge">PREMIUM</div>{% endif %}
+
+    <div class="cert-trophy">{% if cert.result_category == 'champion' %}🏆{% elif cert.result_category == 'survivor' %}🤖{% else %}⚡{% endif %}</div>
+
+    <div class="cert-title">
+      {% if cert.result_category == 'champion' %}BEAT AI CHAMPION
+      {% elif cert.result_category == 'survivor' %}BEAT AI SURVIVOR
+      {% else %}BEAT AI CHALLENGE PARTICIPANT{% endif %}
+    </div>
+
+    <div class="cert-sub">{{ cert.challenge_type.upper() }} {{ 'AI BATTLE' if cert.challenge_type == 'advanced' else 'CHALLENGE' }} — COMPLETED</div>
+    <div class="cert-name">{{ cert.participant_name }}</div>
+    {% if cert.institution %}<div class="cert-inst">{{ cert.institution }}</div>{% endif %}
+
+    <div class="cert-battle">
+      <div class="cert-stat"><div class="n" id="humanN">0</div><div class="l">HUMAN</div></div>
+      <div class="cert-vs">VS</div>
+      <div class="cert-stat"><div class="n" id="aiN">0</div><div class="l">AI</div></div>
+    </div>
+    <div class="cert-diff">DIFFERENCE {{ '%+.0f'|format(cert.human_score_pct - cert.ai_score_pct) }}%</div>
+
+    <div class="cert-footer">
+      <span>{{ cert.issued_at.strftime('%d %B %Y') }}</span>
+      <span>ID: {{ cert.certificate_code }}</span>
+    </div>
+  </div>
+
+  <div class="cert-actions">
+    <a class="btn btn-gold" href="{{ url_for('public.download_certificate', code=cert.certificate_code) }}">DOWNLOAD</a>
+    <button class="btn" id="shareBtn">SHARE</button>
+  </div>
+</div>
+
+<style>
+.cert-stage { display:flex; flex-direction:column; align-items:center; padding: 10px 0 30px; }
+.cert-card { width:100%; max-width:520px; border-radius:18px; padding:34px 24px; text-align:center; color:#fff; background:#101828;
+  border:2px solid #8a6d1f; position:relative; opacity:0; transform: scale(.92) translateY(14px); animation: reveal .6s ease forwards; }
+.cert-stage.premium .cert-card { border:3px solid #D4AF37; box-shadow: 0 0 40px rgba(212,175,55,.25); }
+@keyframes reveal { to { opacity:1; transform: scale(1) translateY(0); } }
+.cert-brand { color:#D4AF37; font-weight:800; font-size:.85rem; letter-spacing:1px; margin-bottom:6px; }
+.cert-premium-badge { position:absolute; top:14px; right:14px; background:#D4AF37; color:#101828; font-size:.65rem; font-weight:800; padding:4px 10px; border-radius:999px; }
+.cert-trophy { font-size:3rem; margin:10px 0; animation: pop .5s ease .3s backwards; }
+@keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+.cert-title { font-size:1.5rem; font-weight:800; color:#D4AF37; margin-bottom:6px; }
+.cert-sub { color:#9ca3af; font-size:.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:16px; }
+.cert-name { font-size:1.6rem; font-weight:800; margin-bottom:2px; }
+.cert-inst { color:#9ca3af; font-size:.85rem; margin-bottom:14px; }
+.cert-battle { display:flex; align-items:center; justify-content:center; gap:24px; margin:18px 0 6px; }
+.cert-stat .n { font-size:2.2rem; font-weight:800; }
+.cert-stat .l { font-size:.75rem; color:#9ca3af; }
+.cert-vs { font-weight:800; color:#D4AF37; }
+.cert-diff { font-weight:700; margin-bottom:18px; }
+.cert-footer { display:flex; justify-content:space-between; font-size:.75rem; color:#9ca3af; border-top:1px solid #2a3344; padding-top:12px; margin-top:8px; }
+.cert-actions { display:flex; gap:10px; margin-top:20px; }
+</style>
+
+<script>
+function animateCount(id, target) {
+  const el = document.getElementById(id);
+  let cur = 0;
+  const step = Math.max(1, target / 30);
+  const t = setInterval(() => {
+    cur += step;
+    if (cur >= target) { cur = target; clearInterval(t); }
+    el.textContent = Math.round(cur) + '%';
+  }, 20);
+}
+animateCount('humanN', {{ cert.human_score_pct }});
+animateCount('aiN', {{ cert.ai_score_pct }});
+
+document.getElementById('shareBtn').addEventListener('click', async () => {
+  const url = window.location.href;
+  if (navigator.share) {
+    navigator.share({ title: 'BEAT AI CHALLENGE', text: 'I just beat AI!', url });
+  } else {
+    await navigator.clipboard.writeText(url);
+    alert('Link copied!');
+  }
+});
+</script>
+{% endblock %}

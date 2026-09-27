@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ 'INTERMEDIATE' if challenge_type == 'intermediate' else 'ADVANCED' }} CHALLENGE — Registration</h1>
+<div class="card">
+  <form method="post">
+    <label>Full name</label>
+    <input type="text" name="name" required>
+    <label>Email</label>
+    <input type="email" name="email" required>
+    <label>Phone</label>
+    <input type="tel" name="phone" required>
+    <label>College / Institution (optional)</label>
+    <input type="text" name="institution">
+    <label style="display:flex;align-items:center;gap:8px;font-weight:400">
+      <input type="checkbox" name="leaderboard_optin" style="width:auto">
+      Show my result on the public leaderboard
+    </label>
+    <div style="margin-top:22px">
+      <button type="submit">Continue to payment</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
